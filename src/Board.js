@@ -58,6 +58,37 @@ class Board {
         return holes;
     }
 
+
+    //============== basic operations ==============//
+
+    showMessage(msg) {
+        // alert(msg);
+        console.log(msg);
+    }
+
+    printBoard() {
+        let str = '   ';
+        for (let i = this.numOfHolesAndStones + 1; i <= 2 * this.numOfHolesAndStones; i++) {
+            str = str + this.holes[i].stones.length + '  ';
+        }
+        str = str + "\n";
+
+        str = str + this.getPlayerSouthStoreHouse().stones.length;
+        for (let i = 0; i < this.numOfHolesAndStones; i++) {
+            str = str + '   ';
+        }
+        str = str + '  ';
+        str = str + this.getPlayerNorthStoreHouse().stones.length;
+        str = str + "\n";
+
+        str = str + '   ';
+        for (let i = this.numOfHolesAndStones - 1; i >= 0; i--) {
+            str = str + this.holes[i].stones.length + '  ';
+        }
+        str = str + "\n";
+        console.log(str);
+    }
+
     //============== store house ==============//
 
     getPlayerSouthStoreHouseIndex() {
@@ -76,7 +107,7 @@ class Board {
         return this.holes[this.getPlayerNorthStoreHouseIndex()];
     }
 
-    //============== basic operations ==============//
+    //============== holes ==============//
 
     getNextHoleIndex(holeIndex) {
         let nextHoleIndex = holeIndex >= this.getPlayerNorthStoreHouseIndex() ? 0 : holeIndex + 1;
@@ -94,15 +125,44 @@ class Board {
         return 2 * this.numOfHolesAndStones - holeIndex;
     }
 
-    //============== board logic ==============//
+    isPlayerSouthHolesEmpty() {
+        for (let i = 0, sum = 0; i < this.numOfHolesAndStones; i++) {
+            sum = sum + this.holes[i].stones.length;
+        }
+        return sum === 0 ? true : false;
+    }
+
+    isPlayerNorthHolesEmpty() {
+        for (let i = this.numOfHolesAndStones + 1, sum = 0; i < 2 * this.numOfHolesAndStones + 1; i++) {
+            sum = sum + this.holes[i].stones.length;
+        }
+        return sum === 0 ? true : false;
+    }
+
+    isCurrentPlayerHolesEmpty() {
+        return this.currentPlayer.id === 'south' ? this.isPlayerSouthHolesEmpty() : this.isPlayerNorthHolesEmpty();
+    }
+
+    //============== main logic ==============//
 
     chooseHoleAndDistribute(holeIndex) {
+        if (holeIndex < 0 || holeIndex > this.numOfHolesAndStones * 2 + 1) {
+            this.showMessage('Out of bound.');
+            return;
+        }
+
         let startHole = this.holes[holeIndex];
 
-        // do validity checking:
-        //  - is hole empty?
-        //  - is store house?
-        //  - is belongs to current player?
+        if (startHole.stones.length === 0) {
+            this.showMessage('Invalid hole. Hole is empty.');
+            return;
+        } else if (startHole.isStoreHouse) {
+            this.showMessage('Invalid hole. This store is a store house.');
+            return;
+        } else if (startHole.player.id !== this.currentPlayer.id) {
+            this.showMessage('Invalid hole. This hole does not belongs to you.');
+            return;
+        }
 
         let stonesInHand = startHole.takeAllStones();
 
@@ -141,29 +201,6 @@ class Board {
             }
         }
         return lastHoleIndex;
-    }
-
-    printBoard() {
-        let str = '   ';
-        for (let i = this.numOfHolesAndStones + 1; i <= 2 * this.numOfHolesAndStones; i++) {
-            str = str + this.holes[i].stones.length + '  ';
-        }
-        str = str + "\n";
-
-        str = str + this.getPlayerSouthStoreHouse().stones.length;
-        for (let i = 0; i < this.numOfHolesAndStones; i++) {
-            str = str + '   ';
-        }
-        str = str + '  ';
-        str = str + this.getPlayerNorthStoreHouse().stones.length;
-        str = str + "\n";
-
-        str = str + '   ';
-        for (let i = this.numOfHolesAndStones - 1; i >= 0; i--) {
-            str = str + this.holes[i].stones.length + '  ';
-        }
-        str = str + "\n";
-        console.log(str);
     }
 }
 
