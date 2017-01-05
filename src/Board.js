@@ -16,13 +16,13 @@ class Board {
     //      6  5  4  3  2  1  0
     constructor() {
         this.numOfHolesAndStones = 7;
+        this.players = this.generatePlayers();
         this.initGame();
     }
 
     //============== init data ==============//
 
     initGame() {
-        this.players = this.generatePlayers();
         this.holes = this.generateHoles();
         this.currentPlayerIndex = 0;
         // debug
@@ -113,7 +113,6 @@ class Board {
         }
         return holes;
     }
-
 
     //============== basic operations ==============//
 

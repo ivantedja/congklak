@@ -14,14 +14,6 @@ class Hole {
         this.stones = this.stones.concat(stones);
     }
 
-    getNumOfStones() {
-        return this.stones.length;
-    }
-
-    markPlayer(player) {
-        this.player = player;
-    }
-
     takeAllStones() {
         const stones = this.stones;
         this.stones = [];
