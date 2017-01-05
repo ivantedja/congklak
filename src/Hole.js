@@ -1,6 +1,7 @@
 class Hole {
     constructor(player) {
         this.isStoreHouse = false;
+        this.isBlocked = false;
         this.stones = [];
         this.player = player;
     }

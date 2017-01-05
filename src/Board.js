@@ -29,6 +29,54 @@ class Board {
         this.printBoard();
     }
 
+    initNextRound() {
+        this.cleanupStones();
+        this.holes = this.generateHolesNextRound();
+        // debug
+        this.printBoard();
+    }
+
+    generateHolesNextRound() {
+        // iterate player, assumed always:
+        //  - [0] -> south player
+        //  - [1] -> north player
+        let holes = [];
+        for (let i = 0; i < this.players.length; i++) {
+            let playerStoreHouse = i === 0 ? this.getPlayerSouthStoreHouse() : this.getPlayerNorthStoreHouse();
+            let storeHouseStones = playerStoreHouse.stones.length;
+            let holesFilled = Math.min(Math.floor(storeHouseStones / this.numOfHolesAndStones), this.numOfHolesAndStones);
+            let holesBlocked = this.numOfHolesAndStones - holesFilled;
+            let storeHouseStonesInit = storeHouseStones - holesFilled * this.numOfHolesAndStones;
+            let offset = i === 0 ? 0 : this.numOfHolesAndStones + 1;
+            // iterate holes
+            for (let j = offset; j < offset + this.numOfHolesAndStones; j++) {
+                // hole
+                let hole = new Hole(this.players[i]);
+                // some holes need to be blocked
+                if (holesBlocked > 0) {
+                    hole.isBlocked = true;
+                    holesBlocked--;
+                } else {
+                    let stones = this.generateStones();
+                    hole.addStones(stones);
+                }
+                // add hole to list
+                holes.push(hole);
+            }
+            // store house
+            let storeHouse = new StoreHouse(this.players[i]);
+            let stones = this.generateStones(storeHouseStonesInit);
+            storeHouse.addStones(stones);
+            // add store house to list
+            holes.push(storeHouse);
+        }
+        return holes;
+    }
+
+    setNextRoundPlayer(playerIndex) {
+        this.currentPlayerIndex = playerIndex;
+    }
+
     generatePlayers() {
         let playerA = new Player('south');
         let playerB = new Player('north');
@@ -36,9 +84,9 @@ class Board {
     }
 
     // init stones per hole for the first time
-    generateStones() {
+    generateStones(numOfStones = this.numOfHolesAndStones) {
         let stones = [];
-        for (let i = 0; i < this.numOfHolesAndStones; i++) {
+        for (let i = 0; i < numOfStones; i++) {
             stones.push(new Stone());
         }
         return stones;
@@ -131,8 +179,10 @@ class Board {
         if (nextHole.isStoreHouse) {
             // store house only accessible for valid player
             if (nextHole.player.id !== this.getCurrentPlayer().id) {
-                nextHoleIndex = this.getNextHoleIndex(nextHoleIndex); // assumed numOfHolesAndStones always > 0
+                nextHoleIndex = this.getNextHoleIndex(nextHoleIndex);
             }
+        } else if (nextHole.isBlocked) {
+            nextHoleIndex = this.getNextHoleIndex(nextHoleIndex);
         }
         return nextHoleIndex;
     }
@@ -157,8 +207,16 @@ class Board {
         return sum === 0 ? true : false;
     }
 
-    isAnyPlayerHolesEmpty() {
-        return this.isPlayerSouthHolesEmpty() || this.isPlayerNorthHolesEmpty();
+    isAnyPlayerHolesEmptyAndSetNextPlayer() {
+        if (this.isPlayerSouthHolesEmpty()) {
+            this.setNextRoundPlayer(1);
+            return true;
+        }
+        if (this.isPlayerNorthHolesEmpty()) {
+            this.setNextRoundPlayer(0);
+            return true;
+        }
+        return false;
     }
 
     //============== player ==============//
@@ -174,24 +232,46 @@ class Board {
 
     //============== main logic ==============//
 
-    isGameOver() {
+    checkGameOverAndEnd() {
         // debug
         this.printBoard();
-        return this.isAnyPlayerHolesEmpty();
+        let isGameOver = false;
+        if (this.isAnyPlayerHolesEmptyAndSetNextPlayer()) {
+            this.cleanupStones();
+            const playerSouthStoreHouse = this.getPlayerSouthStoreHouse();
+            const playerNorthStoreHouse = this.getPlayerNorthStoreHouse();
+            const playerSouthStones = playerSouthStoreHouse.stones.length;
+            const playerNorthStones = playerNorthStoreHouse.stones.length;
+            let winner = null;
+            if (playerSouthStones < this.numOfHolesAndStones) {
+                winner = playerNorthStoreHouse.player.id;
+                isGameOver = true;
+            } else if (playerNorthStones < this.numOfHolesAndStones) {
+                winner = playerSouthStoreHouse.player.id;
+                isGameOver = true;
+            } else if (playerSouthStones > playerNorthStones) {
+                winner = playerSouthStoreHouse.player.id;
+            } else if (playerNorthStones > playerSouthStones) {
+                winner = playerNorthStoreHouse.player.id;
+            }
+            if (winner !== null) {
+                if (isGameOver) {
+                    this.endGame(winner);
+                } else {
+                    this.endRound(winner);
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
-    endGame() {
-        this.cleanupStones();
-        const playerSouthStoreHouse = this.getPlayerSouthStoreHouse();
-        const playerNorthStoreHouse = this.getPlayerNorthStoreHouse();
-        const winner = playerSouthStoreHouse.stones.length > playerNorthStoreHouse.stones.length
-        let result = 'Draw!';
-        if (playerSouthStoreHouse.stones.length > playerNorthStoreHouse.stones.length) {
-            result = 'Winner: ' + playerSouthStoreHouse.player.id;
-        } else if (playerNorthStoreHouse.stones.length > playerSouthStoreHouse.stones.length) {
-            result = 'Winner: ' + playerNorthStoreHouse.player.id;
-        }
-        console.log('Game is ended! ' + result);
+    endRound(winner) {
+        console.log('Round is over! Round winner: ' + winner);
+    }
+
+    endGame(winner) {
+        console.log('Game is over! Game winner: ' + winner);
     }
 
     cleanupStones() {
@@ -259,8 +339,7 @@ class Board {
         if (lastHole.isStoreHouse && lastHole.player.id === currentPlayer.id) {
             // can choose another hole, currentPlayer stay the same
             // end game
-            if (this.isGameOver()) {
-                this.endGame();
+            if (this.checkGameOverAndEnd()) {
                 return;
             }
         } else if (lastHole.stones.length > 1) {
@@ -271,8 +350,7 @@ class Board {
             this.chooseHoleAndDistribute(lastHoleIndex, false);
         } else if (lastHole.stones.length === 1 && lastHole.player.id !== currentPlayer.id) {
             // end game or switch player
-            if (this.isGameOver()) {
-                this.endGame();
+            if (this.checkGameOverAndEnd()) {
                 return;
             }
             this.switchPlayer();
@@ -289,15 +367,13 @@ class Board {
                 const oppositeHoleStones = oppositeHole.takeAllStones();
                 currentPlayerStoreHouse.addStones(oppositeHoleStones);
                 // end game or switch player
-                if (this.isGameOver()) {
-                    this.endGame();
+                if (this.checkGameOverAndEnd()) {
                     return;
                 }
                 this.switchPlayer();
             } else {
                 // end game or switch player
-                if (this.isGameOver()) {
-                    this.endGame();
+                if (this.checkGameOverAndEnd()) {
                     return;
                 }
                 this.switchPlayer();
