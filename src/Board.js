@@ -16,12 +16,18 @@ class Board {
     //      6  5  4  3  2  1  0
     constructor() {
         this.numOfHolesAndStones = 7;
-        this.players = this.generatePlayers();
-        this.holes = this.generateHoles();
-        this.currentPlayer = this.players[0];
+        this.initGame();
     }
 
     //============== init data ==============//
+
+    initGame() {
+        this.players = this.generatePlayers();
+        this.holes = this.generateHoles();
+        this.currentPlayerIndex = 0;
+        // debug
+        this.printBoard();
+    }
 
     generatePlayers() {
         let playerA = new Player('south');
@@ -88,6 +94,10 @@ class Board {
             str = str + this.holes[i].stones.length + '  ';
         }
         str = str + "\n";
+        str = str + "\n";
+        str = str + 'current player: ' + this.getCurrentPlayer().id + "\n";
+        str = str + "\n";
+
         console.log(str);
     }
 
@@ -109,6 +119,10 @@ class Board {
         return this.holes[this.getPlayerNorthStoreHouseIndex()];
     }
 
+    getCurrentPlayerStoreHouse() {
+        return this.getCurrentPlayer().id === 'south' ? this.getPlayerSouthStoreHouse() : this.getPlayerNorthStoreHouse();
+    }
+
     //============== holes ==============//
 
     getNextHoleIndex(holeIndex) {
@@ -116,7 +130,7 @@ class Board {
         let nextHole = this.holes[nextHoleIndex];
         if (nextHole.isStoreHouse) {
             // store house only accessible for valid player
-            if (nextHole.player.id !== this.currentPlayer.id) {
+            if (nextHole.player.id !== this.getCurrentPlayer().id) {
                 nextHoleIndex = this.getNextHoleIndex(nextHoleIndex); // assumed numOfHolesAndStones always > 0
             }
         }
@@ -128,32 +142,82 @@ class Board {
     }
 
     isPlayerSouthHolesEmpty() {
-        for (let i = 0, sum = 0; i < this.numOfHolesAndStones; i++) {
+        let sum = 0;
+        for (let i = 0; i < this.numOfHolesAndStones; i++) {
             sum = sum + this.holes[i].stones.length;
         }
         return sum === 0 ? true : false;
     }
 
     isPlayerNorthHolesEmpty() {
-        for (let i = this.numOfHolesAndStones + 1, sum = 0; i < 2 * this.numOfHolesAndStones + 1; i++) {
+        let sum = 0;
+        for (let i = this.numOfHolesAndStones + 1; i < 2 * this.numOfHolesAndStones + 1; i++) {
             sum = sum + this.holes[i].stones.length;
         }
         return sum === 0 ? true : false;
     }
 
-    isCurrentPlayerHolesEmpty() {
-        return this.currentPlayer.id === 'south' ? this.isPlayerSouthHolesEmpty() : this.isPlayerNorthHolesEmpty();
+    isAnyPlayerHolesEmpty() {
+        return this.isPlayerSouthHolesEmpty() || this.isPlayerNorthHolesEmpty();
+    }
+
+    //============== player ==============//
+
+    getCurrentPlayer() {
+        return this.players[this.currentPlayerIndex];
+    }
+
+    switchPlayer() {
+        this.currentPlayerIndex = this.currentPlayerIndex === 0 ? 1 : 0;
+        console.log('switch player into: ' + this.getCurrentPlayer().id);
     }
 
     //============== main logic ==============//
 
-    chooseHoleAndDistribute(holeIndex) {
+    isGameOver() {
+        // debug
+        this.printBoard();
+        return this.isAnyPlayerHolesEmpty();
+    }
+
+    endGame() {
+        this.cleanupStones();
+        const playerSouthStoreHouse = this.getPlayerSouthStoreHouse();
+        const playerNorthStoreHouse = this.getPlayerNorthStoreHouse();
+        const winner = playerSouthStoreHouse.stones.length > playerNorthStoreHouse.stones.length
+        let result = 'Draw!';
+        if (playerSouthStoreHouse.stones.length > playerNorthStoreHouse.stones.length) {
+            result = 'Winner: ' + playerSouthStoreHouse.player.id;
+        } else if (playerNorthStoreHouse.stones.length > playerSouthStoreHouse.stones.length) {
+            result = 'Winner: ' + playerNorthStoreHouse.player.id;
+        }
+        console.log('Game is ended! ' + result);
+    }
+
+    cleanupStones() {
+        console.log('Cleaning up...');
+        // south
+        const playerSouthStoreHouse = this.getPlayerSouthStoreHouse();
+        for (let i = 0; i < this.numOfHolesAndStones; i++) {
+            playerSouthStoreHouse.addStones(this.holes[i].takeAllStones());
+        }
+        // north
+        const playerNorthStoreHouse = this.getPlayerNorthStoreHouse();
+        for (let i = this.numOfHolesAndStones + 1; i < 2 * this.numOfHolesAndStones + 1; i++) {
+            playerNorthStoreHouse.addStones(this.holes[i].takeAllStones());
+        }
+        // debug
+        this.printBoard();
+    }
+
+    chooseHoleAndDistribute(holeIndex, isHumanChoice = true) {
         if (holeIndex < 0 || holeIndex > this.numOfHolesAndStones * 2 + 1) {
             this.showMessage('Out of bound.');
             return;
         }
 
-        let startHole = this.holes[holeIndex];
+        const startHole = this.holes[holeIndex];
+        const currentPlayer = this.getCurrentPlayer();
 
         if (startHole.stones.length === 0) {
             this.showMessage('Invalid hole. Hole is empty.');
@@ -161,7 +225,7 @@ class Board {
         } else if (startHole.isStoreHouse) {
             this.showMessage('Invalid hole. This store is a store house.');
             return;
-        } else if (startHole.player.id !== this.currentPlayer.id) {
+        } else if (isHumanChoice && startHole.player.id !== currentPlayer.id) {
             this.showMessage('Invalid hole. This hole does not belongs to you.');
             return;
         }
@@ -183,26 +247,62 @@ class Board {
         const lastHole = this.holes[lastHoleIndex];
 
         // additional logic checking where the distribution is ended:
-        //  - in own store house -> can choose another hole
-        //  - in opponent's place -> switch player or end
-        //  - in own place:
-        //      - if opposite hole not empty -> tembak (take stones in opposite hole + stones in current last hole), switch player or end
-        //      - if opposite hole empty -> switch player or end
+        //  - in own store house -> end or can choose another hole
+        //  - in non empty hole -> repeat
+        //  - in opponent's place (empty) -> end or switch player
+        //  - in own place (empty):
+        //      - if opposite hole not empty -> tembak (take stones in opposite hole + stones in current last hole), end or switch player
+        //      - if opposite hole empty -> end or switch player
+        // note: in the code, total stones should be checked against `1` instead of `0`
+        //       because it contains our last stone
 
-        if (lastHole.isStoreHouse && lastHole.player.id === this.currentPlayer.id) {
+        if (lastHole.isStoreHouse && lastHole.player.id === currentPlayer.id) {
             // can choose another hole, currentPlayer stay the same
-        } else if (lastHole.player.id !== this.currentPlayer.id) {
-            // switch player or end
-        } else if (lastHole.player.id === this.currentPlayer.id) {
+            // end game
+            if (this.isGameOver()) {
+                this.endGame();
+                return;
+            }
+        } else if (lastHole.stones.length > 1) {
+            // debug
+            this.printBoard();
+            // non empty holes, repeat
+            // 2nd parameter indicating that it is not a human choice
+            this.chooseHoleAndDistribute(lastHoleIndex, false);
+        } else if (lastHole.stones.length === 1 && lastHole.player.id !== currentPlayer.id) {
+            // end game or switch player
+            if (this.isGameOver()) {
+                this.endGame();
+                return;
+            }
+            this.switchPlayer();
+        } else if (lastHole.stones.length === 1 && lastHole.player.id === currentPlayer.id) {
             const oppositeHoleIndex = this.getOppositeHoleIndex(lastHoleIndex);
             const oppositeHole = this.holes[oppositeHoleIndex];
             if (oppositeHole.stones.length > 0) {
-                // tembak, switch player
+                // tembak
+                const currentPlayerStoreHouse = this.getCurrentPlayerStoreHouse();
+                // retrieve stones from current last hole
+                const lastHoleStones = lastHole.takeAllStones();
+                currentPlayerStoreHouse.addStones(lastHoleStones);
+                // retrieve stones from opposite holes
+                const oppositeHoleStones = oppositeHole.takeAllStones();
+                currentPlayerStoreHouse.addStones(oppositeHoleStones);
+                // end game or switch player
+                if (this.isGameOver()) {
+                    this.endGame();
+                    return;
+                }
+                this.switchPlayer();
             } else {
-                // switch player or end
+                // end game or switch player
+                if (this.isGameOver()) {
+                    this.endGame();
+                    return;
+                }
+                this.switchPlayer();
             }
         }
-        return lastHoleIndex;
     }
 }
 
