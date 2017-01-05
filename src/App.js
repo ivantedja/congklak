@@ -1,5 +1,7 @@
 import Board from './Board';
 
-let board = new Board();
+window.board = new Board();
 
 console.log(board.holes);
+
+board.printBoard();

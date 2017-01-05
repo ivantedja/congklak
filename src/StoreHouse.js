@@ -1,8 +1,8 @@
 import Hole from './Hole';
 
 class StoreHouse extends Hole {
-    constructor() {
-        super();
+    constructor(id) {
+        super(id);
         this.isStoreHouse = true;
     }
 }

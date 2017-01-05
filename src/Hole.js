@@ -5,6 +5,10 @@ class Hole {
         this.player = player;
     }
 
+    addStone(stone) {
+        this.stones.push(stone);
+    }
+
     addStones(stones) {
         this.stones = this.stones.concat(stones);
     }
@@ -15,6 +19,12 @@ class Hole {
 
     markPlayer(player) {
         this.player = player;
+    }
+
+    takeAllStones() {
+        const stones = this.stones;
+        this.stones = [];
+        return stones;
     }
 }
 
