@@ -4,6 +4,16 @@ import Stone from './Stone';
 import Player from './Player';
 
 class Board {
+    // assumed numOfHolesAndStones = 7
+    //
+    // holes belongs to:
+    //  - player 1:  0  1  2  3  4  5  6  [7]
+    //  - player 2:  8  9 10 11 12 13 14 [15]
+    //
+    // holes representation:
+    //      8  9 10 11 12 13 14
+    //  [7]                     [15]
+    //      6  5  4  3  2  1  0
     constructor() {
         this.numOfHolesAndStones = 7;
         this.players = this.generatePlayers();
@@ -29,14 +39,6 @@ class Board {
     }
 
     // init holes on board (including store house)
-    // holes belongs to:
-    //  - player 1:  0  1  2  3  4  5  6  [7]
-    //  - player 2:  8  9 10 11 12 13 14 [15]
-    //
-    // holes representation:
-    //      8  9 10 11 12 13 14
-    //  [7]                     [15]
-    //      6  5  4  3  2  1  0
     generateHoles() {
         let holes = [];
         // iterate player
