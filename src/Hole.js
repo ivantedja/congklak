@@ -1,8 +1,8 @@
 class Hole {
-    constructor() {
+    constructor(player) {
         this.isStoreHouse = false;
         this.stones = [];
-        this.player = null;
+        this.player = player;
     }
 
     addStones(stones) {

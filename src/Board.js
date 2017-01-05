@@ -8,6 +8,7 @@ class Board {
         this.numOfHolesAndStones = 7;
         this.players = [new Player('one'), new Player('two')];
         this.holes = this.generateHoles();
+        this.currentPlayer = null;
     }
 
     // init stones per hole for the first time
@@ -30,16 +31,14 @@ class Board {
             // iterate holes
             for (let j = 0; j < this.numOfHolesAndStones; j++) {
                 // hole
-                let hole = new Hole();
+                let hole = new Hole(this.players[i]);
                 let stones = this.generateStones();
                 hole.addStones(stones);
-                hole.markPlayer(this.players[i]);
                 // add hole to list
                 holes.push(hole);
             }
             // store house
-            let storeHouse = new StoreHouse();
-            storeHouse.markPlayer(this.players[i]);
+            let storeHouse = new StoreHouse(this.players[i]);
             // add store house to list
             holes.push(storeHouse);
         }
