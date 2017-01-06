@@ -181,7 +181,6 @@ class Board {
     }
 
     cleanupStones() {
-        console.log('Cleaning up...');
         // south
         const playerSouthStoreHouse = this.getPlayerSouthStoreHouse();
         for (let i = 0; i < this.numOfHolesAndStones; i++) {
@@ -202,7 +201,6 @@ class Board {
 
     switchPlayer() {
         this.currentPlayerIndex = this.currentPlayerIndex === 0 ? 1 : 0;
-        console.log('switch player into: ' + this.getCurrentPlayer().id);
     }
 }
 

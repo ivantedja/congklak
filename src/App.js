@@ -1,14 +1,17 @@
+import $ from 'jquery';
 import Board from './model/Board';
 
 class Congklak {
     constructor() {
         this.delayMs = 1000;
+        this.queueDisplay = [];
         this.board = new Board();
+        this.drawBoardUI();
     }
     //============== basic operations ==============//
 
     showMessage(msg) {
-        // alert(msg);
+        alert(msg);
         console.log(msg);
     }
 
@@ -45,11 +48,78 @@ class Congklak {
         console.log(str);
     }
 
+    getBoardHtml() {
+        let html = 'Current Player: ' + this.board.getCurrentPlayer().id;
+
+        html += '<table>';
+
+        // first row (north player)
+        html += '<tr><td></td>';
+        for (let i = this.board.numOfHolesAndStones + 1; i <= 2 * this.board.numOfHolesAndStones; i++) {
+            html += '<td><span class="hole" data-hole="' + i + '">' + this.board.holes[i].stones.length + '</span></td>';
+        }
+        html += '<td></td></tr>';
+
+        // second row (store houses)
+        html += '<tr>';
+        html += '<td><span id="hole-' + this.board.getPlayerSouthStoreHouseIndex() + '">' +
+            this.board.getPlayerSouthStoreHouse().stones.length + '</span></td>';
+        html += '<td colspan="' + this.board.numOfHolesAndStones + '"></td>';
+        html += '<td><span id="hole-' + this.board.getPlayerNorthStoreHouseIndex() + '">' +
+            this.board.getPlayerNorthStoreHouse().stones.length + '</span></td>';
+        html += '</tr>';
+
+        // third row (south player)
+        html += '<tr><td></td>';
+        for (let i = this.board.numOfHolesAndStones - 1; i >= 0; i--) {
+            html += '<td><span class="hole" data-hole="' + i + '">' + this.board.holes[i].stones.length + '</span></td>';
+        }
+        html += '<td></td></tr>';
+
+        html += '</table>';
+
+        return html;
+    }
+
+    observeOnClickEvent() {
+        const self = this;
+        $('.hole').each((idx, elem) => {
+            $(elem).click(() => {
+                self.chooseHoleAndDistribute($(elem).data('hole'));
+            });
+        });
+    }
+
+    drawBoardUI() {
+        $('#congklak').html(this.getBoardHtml());
+        this.observeOnClickEvent();
+    }
+
+    drawFromQueue() {
+        let counter = 0;
+        console.log(this.queueDisplay);
+        const start = new Date().getTime();
+        console.log('start', start);
+        const queueLength = this.queueDisplay.length;
+        for (let i = 1; i <= queueLength; i++) {
+            setTimeout(function() {
+                let now = new Date().getTime();
+                console.log(now - start, 'comp', i * 1000);
+                if (now - start > i * 1000) {
+                    let html = this.queueDisplay.shift();
+                    console.log(html);
+                    $('#congklak').html(html);
+                }
+            }.bind(this), 100);
+        }
+    }
+
     //============== main logic ==============//
 
     checkGameOverAndEnd() {
         // debug
         this.printBoard();
+        this.drawBoardUI();
         let isGameOver = false;
         if (this.board.isAnyPlayerHolesEmptyAndSetNextPlayer()) {
             this.board.cleanupStones();
@@ -82,11 +152,11 @@ class Congklak {
     }
 
     endRound(winner) {
-        console.log('Round is over! Round winner: ' + winner);
+        this.showMessage('Round is over! Round winner: ' + winner);
     }
 
     endGame(winner) {
-        console.log('Game is over! Game winner: ' + winner);
+        this.showMessage('Game is over! Game winner: ' + winner);
     }
 
     chooseHoleAndDistribute(holeIndex, isHumanChoice = true) {
@@ -120,10 +190,11 @@ class Congklak {
             // mark as moved to next hole
             holeIndex = nextHoleIndex;
 
-            console.log('-----sleep-----');
             this.printBoard();
-            this.pause();
         }
+
+        // draw UI
+        this.drawBoardUI();
 
         // record last hole
         const lastHoleIndex = holeIndex;
@@ -140,6 +211,7 @@ class Congklak {
         //       because it contains our last stone
 
         if (lastHole.isStoreHouse && lastHole.player.id === currentPlayer.id) {
+            this.showMessage('You\'re landed in your store house. Continue.');
             // can choose another hole, currentPlayer stay the same
             // end game
             if (this.checkGameOverAndEnd()) {
@@ -148,6 +220,7 @@ class Congklak {
         } else if (lastHole.stones.length > 1) {
             // debug
             this.printBoard();
+            this.drawBoardUI();
             // non empty holes, repeat
             // 2nd parameter indicating that it is not a human choice
             this.chooseHoleAndDistribute(lastHoleIndex, false);
@@ -157,11 +230,13 @@ class Congklak {
                 return;
             }
             this.board.switchPlayer();
+            this.showMessage('Switch player into: ' + this.board.getCurrentPlayer().id);
         } else if (lastHole.stones.length === 1 && lastHole.player.id === currentPlayer.id) {
             const oppositeHoleIndex = this.board.getOppositeHoleIndex(lastHoleIndex);
             const oppositeHole = this.board.holes[oppositeHoleIndex];
             if (oppositeHole.stones.length > 0) {
                 // tembak
+                this.showMessage('Tembak!');
                 const currentPlayerStoreHouse = this.board.getCurrentPlayerStoreHouse();
                 // retrieve stones from current last hole
                 const lastHoleStones = lastHole.takeAllStones();
@@ -174,12 +249,14 @@ class Congklak {
                     return;
                 }
                 this.board.switchPlayer();
+                this.showMessage('Switch player into: ' + this.board.getCurrentPlayer().id);
             } else {
                 // end game or switch player
                 if (this.checkGameOverAndEnd()) {
                     return;
                 }
                 this.board.switchPlayer();
+                this.showMessage('Switch player into: ' + this.board.getCurrentPlayer().id);
             }
         }
     }
