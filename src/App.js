@@ -3,7 +3,6 @@ import Board from './model/Board';
 
 class Congklak {
     constructor() {
-        this.delayMs = 1000;
         this.queueDisplay = [];
         this.board = new Board();
         this.gameStatus = 0; // 0 = on going, 1 = end round, 2 = end game
