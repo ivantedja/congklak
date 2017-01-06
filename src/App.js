@@ -13,6 +13,11 @@ class Congklak {
     showMessage(msg) {
         alert(msg);
         console.log(msg);
+        this.appendLog(msg + "\n");
+    }
+
+    appendLog(msg) {
+        $('#log').append(msg);
     }
 
     // taken from: http://www.sean.co.uk/a/webdesign/javascriptdelay.shtm
@@ -22,30 +27,33 @@ class Congklak {
     }
 
     printBoard() {
-        let str = '   ';
+        const leftPadding = (str) => {
+            return ('    ' + str).slice(-4);
+        };
+
+        let str = 'Current player: ' + this.board.getCurrentPlayer().id + "\n";
+        str += leftPadding('');
         for (let i = this.board.numOfHolesAndStones + 1; i <= 2 * this.board.numOfHolesAndStones; i++) {
-            str = str + this.board.holes[i].stones.length + '  ';
+            str += leftPadding(this.board.holes[i].stones.length);
         }
-        str = str + "\n";
+        str += "\n";
 
-        str = str + this.board.getPlayerSouthStoreHouse().stones.length;
+        str += leftPadding(this.board.getPlayerSouthStoreHouse().stones.length);
         for (let i = 0; i < this.board.numOfHolesAndStones; i++) {
-            str = str + '   ';
+            str += leftPadding('');
         }
-        str = str + '  ';
-        str = str + this.board.getPlayerNorthStoreHouse().stones.length;
-        str = str + "\n";
+        str += leftPadding(this.board.getPlayerNorthStoreHouse().stones.length);
+        str += "\n";
 
-        str = str + '   ';
+        str += leftPadding('');
         for (let i = this.board.numOfHolesAndStones - 1; i >= 0; i--) {
-            str = str + this.board.holes[i].stones.length + '  ';
+            str += leftPadding(this.board.holes[i].stones.length);
         }
-        str = str + "\n";
-        str = str + "\n";
-        str = str + 'current player: ' + this.board.getCurrentPlayer().id + "\n";
-        str = str + "\n";
+        str += "\n";
+        str += "\n";
 
         console.log(str);
+        this.appendLog(str);
     }
 
     getBoardHtml() {
@@ -160,6 +168,10 @@ class Congklak {
     }
 
     chooseHoleAndDistribute(holeIndex, isHumanChoice = true) {
+        if (isHumanChoice) {
+            this.showMessage('Hole index ' + holeIndex + ' is chosen');
+        }
+
         if (holeIndex < 0 || holeIndex > this.board.numOfHolesAndStones * 2 + 1) {
             this.showMessage('Out of bound.');
             return;

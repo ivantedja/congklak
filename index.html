@@ -11,11 +11,38 @@
     </head>
     <body>
         <style type="text/css">
+            .container {
+                width: 900px;
+            }
+            #congklak {
+                width: 500px;
+                height: 300px;
+                float: left;
+            }
+            #log {
+                float: right;
+                font-family: courier;
+            }
             table td {
-                padding: 30px;
+                padding: 20px;
+            }
+            table td span {
+                cursor: pointer;
+            }
+            #controls {
+                clear: both;
             }
         </style>
-        <div id="congklak"></div>
+        <pre>holes index:
+     8  9 10 11 12 13 14
+ [7]                     [15]
+     6  5  4  3  2  1  0</pre>
+        <div class="container">
+            <div id="congklak"></div>
+            <textarea id="log" rows="30" cols="40"></textarea>
+        </div>
+        <div id="controls"></div>
+        <buttton onclick="board.initGame()">Reset Game</buttton>
         <script src="./dist/App.js"> </script>
     </body>
 </html>
