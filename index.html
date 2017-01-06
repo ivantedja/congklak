@@ -26,23 +26,39 @@
             table td {
                 padding: 20px;
             }
-            table td span {
+            .hole {
                 cursor: pointer;
+                border: 1px solid black;
+                padding: 10px;
             }
-            #controls {
+            .hole.blocked {
+                background-color: red;
+            }
+            .clear {
                 clear: both;
+            }
+            button {
+                border: 1px solid black;
+                padding: 5px;
+                margin: 5px;
             }
         </style>
         <div>Holes index:</div>
-        <pre>8  9 10 11 12 13 14
+        <pre>     8  9 10 11 12 13 14
  [7]                     [15]
      6  5  4  3  2  1  0</pre>
         <div class="container">
             <div id="congklak"></div>
-            <textarea id="log" rows="30" cols="40"></textarea>
+            <textarea id="log" rows="30" cols="35"></textarea>
         </div>
-        <div id="controls"></div>
-        <buttton onclick="board.initGame()">Reset Game</buttton>
+        <div class="clear"></div>
+        <div id="round-controls" style="display:none;">
+            <button type="button" onclick="congklak.nextRound()">Continue Next Round</button>
+            <button type="button" onclick="congklak.forceEndGame()">End Game</button>
+        </div>
+        <div>
+            <button type="button" onclick="congklak.initGame()">Reset Game</button>
+        </div>
         <script src="./dist/App.js"> </script>
     </body>
 </html>
