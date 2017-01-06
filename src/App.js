@@ -44,8 +44,7 @@ class Congklak {
         for (let i = this.board.numOfHolesAndStones - 1; i >= 0; i--) {
             str += leftPadding(this.board.holes[i].stones.length);
         }
-        str += "\n";
-        str += "\n";
+        str += "\n----------------------------\n";
 
         console.log(str);
         this.appendLog(str);
@@ -116,6 +115,14 @@ class Congklak {
     }
 
     //============== main logic ==============//
+
+    resetGame() {
+        this.board.initGame();
+        // debug
+        this.showMessage('Reset game.');
+        this.printBoard();
+        this.drawBoardUI();
+    }
 
     checkGameOverAndEnd() {
         // debug
