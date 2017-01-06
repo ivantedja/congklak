@@ -68,10 +68,10 @@ class Congklak {
 
         // second row (store houses)
         html += '<tr>';
-        html += '<td><span id="hole-' + this.board.getPlayerSouthStoreHouseIndex() + '">' +
+        html += '<td><span class="store-house" id="hole-' + this.board.getPlayerSouthStoreHouseIndex() + '">' +
             this.board.getPlayerSouthStoreHouse().stones.length + '</span></td>';
         html += '<td colspan="' + this.board.numOfHolesAndStones + '"></td>';
-        html += '<td><span id="hole-' + this.board.getPlayerNorthStoreHouseIndex() + '">' +
+        html += '<td><span class="store-house" id="hole-' + this.board.getPlayerNorthStoreHouseIndex() + '">' +
             this.board.getPlayerNorthStoreHouse().stones.length + '</span></td>';
         html += '</tr>';
 
@@ -265,6 +265,7 @@ class Congklak {
         } else if (lastHole.stones.length > 1) {
             // non empty holes, repeat
             // 2nd parameter indicating that it is not a human choice
+            this.showMessage('Non empty hole in hole index ' + lastHoleIndex + ', keep iterating');
             this.chooseHoleAndDistribute(lastHoleIndex, false);
         } else if (lastHole.stones.length === 1 && lastHole.player.id !== currentPlayer.id) {
             // end game or switch player
