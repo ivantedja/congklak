@@ -6,6 +6,7 @@ class Congklak {
         this.delayMs = 1000;
         this.queueDisplay = [];
         this.board = new Board();
+        this.gameStatus = 0; // 0 = on going, 1 = end round, 2 = end game
         this.drawBoardUI();
     }
     //============== basic operations ==============//
@@ -152,6 +153,7 @@ class Congklak {
     }
 
     endRound(winner) {
+        this.gameStatus = 1;
         this.showRoundControls();
         // debug
         this.printBoard();
@@ -160,6 +162,7 @@ class Congklak {
     }
 
     endGame(winner) {
+        this.gameStatus = 2;
         // debug
         this.printBoard();
         this.drawBoardUI();
@@ -178,15 +181,14 @@ class Congklak {
         } else if (playerNorthStones > playerSouthStones) {
             winner = playerNorthStoreHouse.player.id;
         }
-        this.showMessage('Force end game. Winner: ' + winner);
-        // debug
-        this.printBoard();
-        this.drawBoardUI();
+        this.showMessage('Force end game.');
+        this.endGame(winner);
     }
 
     nextRound() {
         this.showMessage('Continue next round.');
         this.board.initNextRound();
+        this.gameStatus = 0;
         // debug
         this.printBoard();
         this.drawBoardUI();
