@@ -1,4 +1,4 @@
-import Board from './Board';
+import Board from './model/Board';
 
 class Congklak {
     constructor() {
