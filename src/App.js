@@ -8,6 +8,7 @@ class Congklak {
         this.gameStatus = 0; // 0 = on going, 1 = end round, 2 = end game
         this.drawBoardUI();
     }
+
     //============== basic operations ==============//
 
     showMessage(msg) {
