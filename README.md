@@ -51,11 +51,11 @@ Here are the models involved:
 
 ### Screenshots
 
-![screenshot 1](https://github.com/ivantedja/congklak/screenshots/screenshot-1.png)
+![screenshot 1](https://github.com/ivantedja/congklak/raw/master/screenshots/screenshot-1.png)
 
-![screenshot 2](https://github.com/ivantedja/congklak/screenshots/screenshot-2.png)
+![screenshot 2](https://github.com/ivantedja/congklak/raw/master/screenshots/screenshot-2.png)
 
-![screenshot 3](https://github.com/ivantedja/congklak/screenshots/screenshot-3.png)
+![screenshot 3](https://github.com/ivantedja/congklak/raw/master/screenshots/screenshot-3.png)
 
 ### Stacks involved
 
