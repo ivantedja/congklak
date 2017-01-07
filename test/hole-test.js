@@ -5,10 +5,15 @@ import Stone from '../src/model/Stone';
 import Player from '../src/model/Player';
 
 describe('test hole and stone', function() {
+    var hole;
+
+    beforeEach(function () {
+        var player = new Player('south');
+        hole = new Hole(player);
+    });
+
     describe('test hole not store house', function() {
         it('should not a store house', function() {
-            var hole = new Hole();
-
             assert.isNotOk(hole.isStoreHouse, 'hole is not a store house');
         });
     });
@@ -16,43 +21,35 @@ describe('test hole and stone', function() {
     describe('test add stone', function() {
         it('should add 1 stone', function() {
             var stone = new Stone();
-            var hole = new Hole();
-
             hole.addStone(stone);
-
             assert.equal(hole.stones.length, 1);
         });
     });
 
     describe('test add stones and take all stones', function() {
-        var stones = [];
-        var totalStone = 7;
-        for (var i = 0; i < totalStone; i++) {
-            var stone = new Stone();
-            stones.push(stone);
-        }
-        var hole = new Hole();
-        it('should add ' + totalStone + ' stones', function() {   
+        beforeEach(function () {
+            var stones = [];
+            for (var i = 0; i < 7; i++) {
+                var stone = new Stone();
+                stones.push(stone);
+            }
             hole.addStones(stones);
-            assert.equal(hole.stones.length, totalStone);
+        });
+        it('should add 7 stones', function() {   
+            assert.equal(hole.stones.length, 7);
         });
         it('should take all stones', function() {   
             var stonesTaken = hole.takeAllStones();
-            assert.equal(stonesTaken.length, totalStone, 'stones taken ' + totalStone);
+            assert.equal(stonesTaken.length, 7, 'stones taken 7');
             assert.equal(hole.stones.length, 0, '0 stone left in hole');
         });
     });
 
     describe('test hole belongs to player', function() {
-        var player = new Player('south');
         it('should belongs to player south', function() {
-            var hole = new Hole(player);
-
             assert.equal(hole.player.id, 'south');
         });
         it('should not belongs to player north', function() {
-            var hole = new Hole(player);
-
             assert.notEqual(hole.player.id, 'north');
         });
     });
