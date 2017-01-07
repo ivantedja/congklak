@@ -6,7 +6,6 @@ class Congklak {
         this.queueDisplay = [];
         this.board = new Board();
         this.gameStatus = 0; // 0 = on going, 1 = end round, 2 = end game
-        this.drawBoardUI();
     }
 
     //============== basic operations ==============//
@@ -308,4 +307,9 @@ class Congklak {
     }
 }
 
-window.congklak = new Congklak();
+if (typeof window !== "undefined") {
+    window.congklak = new Congklak();
+    window.congklak.drawBoardUI();
+}
+
+export default Congklak;
