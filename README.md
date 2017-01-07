@@ -49,6 +49,14 @@ Here are the models involved:
 - Player
 - Stone
 
+### Screenshots
+
+![screenshot 1](https://github.com/ivantedja/congklak/screenshots/screenshot-1.png)
+
+![screenshot 2](https://github.com/ivantedja/congklak/screenshots/screenshot-2.png)
+
+![screenshot 3](https://github.com/ivantedja/congklak/screenshots/screenshot-3.png)
+
 ### Stacks involved
 
 - [ES6 boilerplate](https://github.com/thoughtram/es6-babel-browserify-boilerplate)
