@@ -12,7 +12,7 @@ cd congklak
 # Then, you need to install all the dependencies...
 npm install
 
-# If you wanna be able to use global commands `karma` and `gulp`...
+# If you wanna be able to use global commands `gulp`...
 npm install -g gulp
 ```
 
@@ -30,11 +30,12 @@ gulp watch
 npm test
 ```
 
-### If you just wanna run it, just open `index.html` in your browser
+### If you just wanna run it
 
+Just open `index.html` in your browser. See it live in [here](https://ivantedja.github.io/congklak/)
 
 ### Brief Description
-```
+```bash
 # holes are represented by Array with index as follows:
       8  9 10 11 12 13 14
   [7]                     [15]
