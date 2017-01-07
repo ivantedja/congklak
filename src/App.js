@@ -6,21 +6,42 @@ class Congklak {
         this.queueDisplay = [];
         this.board = new Board();
         this.gameStatus = 0; // 0 = on going, 1 = end round, 2 = end game
+        this.drawBoardUI();
     }
 
-    //============== basic operations ==============//
+    //============== browser operations ==============//
+
+    isBrowser() {
+        if (typeof window !== "undefined") {
+            return true;
+        }
+        return false;
+    }
+
+    isNonBrowser() {
+        return !this.isBrowser();
+    }
 
     showMessage(msg) {
+        if (this.isNonBrowser()) {
+            return;
+        }
         alert(msg);
         console.log(msg);
         this.appendLog(msg + "\n");
     }
 
     appendLog(msg) {
+        if (this.isNonBrowser()) {
+            return;
+        }
         $('#log').append(msg);
     }
 
     printBoard() {
+        if (this.isNonBrowser()) {
+            return;
+        }
         const leftPadding = (str) => {
             return ('    ' + str).slice(-4);
         };
@@ -91,6 +112,9 @@ class Congklak {
     }
 
     observeOnClickHole() {
+        if (this.isNonBrowser()) {
+            return;
+        }
         const self = this;
         $('.hole').each((idx, elem) => {
             $(elem).click(() => {
@@ -100,11 +124,17 @@ class Congklak {
     }
 
     drawBoardUI() {
+        if (this.isNonBrowser()) {
+            return;
+        }
         $('#congklak').html(this.getBoardHtml());
         this.observeOnClickHole();
     }
 
     showRoundControls() {
+        if (this.isNonBrowser()) {
+            return;
+        }
         $('#round-controls').show();
         $('#round-controls').find('button').each((idx, elem) => {
             $(elem).click(() => {
@@ -148,11 +178,9 @@ class Congklak {
             }
             if (winner !== null) {
                 if (isGameOver) {
-                    this.endGame(winner);
-                } else {
-                    this.endRound(winner);
+                    return this.endGame(winner);
                 }
-                return true;
+                return this.endRound(winner);
             }
         }
         return false;
@@ -165,6 +193,7 @@ class Congklak {
         this.printBoard();
         this.drawBoardUI();
         this.showMessage('Round is over! Round winner: ' + winner);
+        return winner;
     }
 
     endGame(winner) {
@@ -173,6 +202,7 @@ class Congklak {
         this.printBoard();
         this.drawBoardUI();
         this.showMessage('Game is over! Game winner: ' + winner);
+        return winner;
     }
 
     forceEndGame() {
@@ -189,6 +219,7 @@ class Congklak {
         }
         this.showMessage('Force end game.');
         this.endGame(winner);
+        return winner
     }
 
     nextRound() {
@@ -309,7 +340,6 @@ class Congklak {
 
 if (typeof window !== "undefined") {
     window.congklak = new Congklak();
-    window.congklak.drawBoardUI();
 }
 
 export default Congklak;
